@@ -1,0 +1,2 @@
+method,seed,team_size,pop_size,generations,best_team,best_fitness,duration_sec
+GA,0,4,6,10,"[498, 93, 423, 7]",0.40866331907616965,81.2812083059689
