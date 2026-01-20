@@ -1,4 +1,4 @@
-# STFP_NSE_ICSE — Replication & Supplementary Package (BN + GA for Software Team Formation)
+# Replication & Supplementary Package (BN + GA for Software Team Formation)
 
 This repository is the **replication package** for the paper version used in the **NSE/ICSE** submission.  
 It contains the **core implementation** (Bayesian Network evaluator + Genetic Algorithm + feature extraction) and the **exact scripts/data artifacts** used to generate the **supplementary results** reported in the paper:
