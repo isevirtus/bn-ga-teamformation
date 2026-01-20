@@ -1,74 +1,235 @@
-# BN-GA Team Formation
+# STFP_NSE_ICSE — Replication & Supplementary Package (BN + GA for Software Team Formation)
 
-This repository contains the codebase for the **BN-GA Team Formation** project, which integrates a Bayesian Network (BN) calibrated with expert knowledge and a Genetic Algorithm (GA) to optimize software team formation, considering both technical coverage and collaborative compatibility.
+This repository is the **replication package** for the paper version used in the **NSE/ICSE** submission.  
+It contains the **core implementation** (Bayesian Network evaluator + Genetic Algorithm + feature extraction) and the **exact scripts/data artifacts** used to generate the **supplementary results** reported in the paper:
 
-## 📁 Project Structure
+- **RQ1 — Expert Ranking vs. BN Ranking** (Table-1 agreement data + auxiliary ranking files)
+- **RQ2 — GA Runtime using BN fitness** (per-run logs + summary)
+- **BN Sanity Check** (extreme/consistency scenarios)
+
+> **Important note on data**: running the experiments requires `Data/Dev_DB.json` and `Data/Graph_DB.json`.  
+> If these files are not included due to confidentiality, the code still documents the full pipeline, but execution will require a compatible dataset.
+
+---
+
+## Repository Structure
 
 ```
-STFP/
+STFP_NSE_ICSE/
 ├── Algorithms/
 │   ├── BN/
-│   │   ├── bnetwork.py                # BN evaluator and CPT generation
-│   │   ├── team_fit_bn.py             # BN calibration and fitting
-│   │   └── utils.py                   # BN utilities
-│   ├── GA/
-│   │   ├── engine.py                  # Genetic Algorithm main logic
-│   │   ├── run_ga_10seeds.py          # Run GA for 10 seeds
-│   │   ├── run_random_10seeds.py      # Random baseline runner
-│   │   ├── random_search_baseline.py  # Random search baseline implementation
-│   │   ├── benchmark_bn_runtime.py    # Benchmark BN runtime
-│   │   └── scenario_consistency.py    # Analyzes scenario coverage
-│   └── Reports/
-│       └── ga_10seeds_results.csv     # Results from GA across seeds
-│
-├── Data/
-│   ├── Dev_DB.json                    # Developer database
-│   └── Graph_DB.json                  # Collaboration graph
+│   │   ├── bnetwork.py                 # BN engine and inference wrapper
+│   │   ├── team_fit_bn.py              # BN structure + CPT generation/calibration
+│   │   ├── utils.py                    # BN utilities (states, aggregation, helpers)
+│   │   └── repositorio.json            # (if present) samples/centroids for ranked nodes
+│   └── GA/
+│       ├── engine.py                   # GA core loop (selection/crossover/mutation/stop)
+│       └── ...                         # other GA helpers (kept only if required)
 │
 ├── Feature_Extraction/
 │   ├── Dimension_Scoring/
-│   │   ├── dimension_scoring.py       # Score AT and AC
-│   │   ├── linear_regression_calibrator.py # Linear model for expert calibration
-│   │   └── pesos_calibrados.json      # Calibrated weights for FS estimation
+│   │   ├── dimension_scoring.py        # Technical coverage scoring (Domain/Ecosystem/Language)
+│   │   ├── linear_regression_calibrator.py  # FS regression calibration utilities (if used)
+│   │   └── pesos_calibrados.json       # calibrated weights (if used)
 │   └── PC_Transformer/
-│       ├── filter_devs_by_graph.py    # Filters developers by connectivity
-│       └── pc_transformer.py          # PC calculation based on FS regression
+│       ├── pc_transformer.py           # Pair Compatibility (PC) → AC mapping
+│       └── filter_devs_by_graph.py     # graph-based filtering (if used)
 │
 ├── Pipeline/
-│   └── evaluate_teams.py              # Main entry to evaluate teams using BN
+│   ├── evaluate_teams.py               # Main evaluator: AT + AC → BN inference → AE
+│   ├── scenarios.py                    # (if used) scenario definitions/helpers
+│   └── bench_bn_simple.py              # (if used) baseline evaluator
 │
-└── Validation/
-    ├── run_ga.py                      # Run GA for final experiments
-    ├── gradient_checking_rb.py        # Gradient behavior validation
-    ├── grafico_gradient.py            # Plotting script for gradients
-    ├── *.csv, *.png                   # Results and visualizations
+├── Data/
+│   ├── Dev_DB.json                     # Developer database (required to run)
+│   └── Graph_DB.json                   # Collaboration graph (required to run)
+│
+├── rq1_expert_ranking/
+│   ├── eval_team_per_project_bn_full.py         # RQ1: scores candidate teams with BN
+│   ├── compute_rank_metrics.py                  # RQ1: builds agreement and ranking metrics
+│   ├── team_per_project.csv                     # candidate teams per project (input/record)
+│   ├── team_per_project_bn_scored_full_005.csv  # BN-scored teams (generated / provided)
+│   ├── ranking_expert.csv                       # expert ranking (input)
+│   ├── ranking_bn.csv                           # BN ranking (generated / provided)
+│   ├── rank_expert_rank_bn.csv                  # Table-1 agreement data (generated / provided)
+│   └── metrics_rank.csv                         # extra ranking metrics (optional)
+│
+├── rq2_runtime/
+│   ├── rt_ga_bn_only_engine.py          # RQ2: measures GA runtime using BN fitness
+│   ├── ga_bn_only_runs.csv              # per-run runtime logs (generated / provided)
+│   └── ga_bn_only_summary.csv           # aggregated runtime summary (generated / provided)
+│
+├── bn_sanity_check/
+│   ├── run_sanity_bn.py                 # BN sanity scenarios runner
+│   ├── scenarios_sanity_bn.csv          # sanity scenarios inputs
+│   ├── sanity_bn_results.csv            # sanity outputs (generated / provided)
+│   ├── sanity_bn_checks.txt             # sanity check report (generated / provided)
+│   └── out/                             # optional extra outputs
+│
+├── GA_Runtime.xlsx                      # Human-readable spreadsheet (optional viewer)
+├── Sanity_check.xlsx                    # Human-readable spreadsheet (optional viewer)
+├── Experiment_Ranking_Expert_BN.xlsx    # Human-readable spreadsheet (optional viewer)
+├── __init__.py
+└── README.md
 ```
 
-## 🚀 How to Run
+---
 
-1. Prepare the datasets:
-   - Place `Dev_DB.json` and `Graph_DB.json` in the `Data/` folder.
+## Quick Start
 
-2. Run GA with calibrated BN:
+### 1) Environment
+Recommended: **Python 3.10+** (Windows/Linux/macOS).
+
+Create and activate a virtual environment:
+
 ```bash
-python Validation/run_ga.py
+python -m venv .venv
+# Windows (PowerShell)
+.venv\Scripts\Activate.ps1
+# Linux/macOS
+source .venv/bin/activate
 ```
 
-3. Run baseline:
+Install dependencies.
+
+If you already have a `requirements.txt`, use:
+
 ```bash
-python Algorithms/GA/random_search_baseline.py
+pip install -r requirements.txt
 ```
 
-## 📊 Outputs
+If you do **not** have `requirements.txt`, install the common packages used by this project:
 
-- Fitness evaluations (`AE`) per team.
-- Scenario coverage report.
-- Sensitivity plots and gradient checks.
+```bash
+pip install numpy pandas scipy networkx pgmpy
+```
 
-## 📄 License
+> If you run into a missing-import error, install the missing package reported by Python.
 
-This project is licensed under the MIT License.
+---
 
-## 🙋‍♂️ Author
+## Reproducing the Paper Results
 
-Felipe Oliveira Miranda Cunha – PPGCC/UFCG
+### RQ1 — Expert Ranking vs BN Ranking (Table-1 agreement)
+
+This reproduces the data used to compare the **expert top-1 / bottom-1** choices against the BN ranking.
+
+Run:
+
+```bash
+python rq1_expert_ranking/eval_team_per_project_bn_full.py
+python rq1_expert_ranking/compute_rank_metrics.py
+```
+
+Main files:
+
+- `rq1_expert_ranking/team_per_project.csv`  
+  Candidate teams per project (the same 5 teams per project used in the workshop/paper).
+- `rq1_expert_ranking/ranking_expert.csv`  
+  Expert’s ranking (input).
+- `rq1_expert_ranking/team_per_project_bn_scored_full_005.csv`  
+  BN-scored teams (output).
+- `rq1_expert_ranking/ranking_bn.csv`  
+  BN ranking derived from BN scores (output).
+- `rq1_expert_ranking/rank_expert_rank_bn.csv`  
+  **Agreement dataset** used to build Table-1 (output).
+- `rq1_expert_ranking/metrics_rank.csv`  
+  Optional extra ranking metrics (not required by the paper table, but useful for analysis).
+
+**What to cite as supplementary for RQ1**
+- `rank_expert_rank_bn.csv` (Table-1 agreement evidence)
+- `ranking_expert.csv` + `ranking_bn.csv` (rankings)
+- `team_per_project_bn_scored_full_005.csv` (scores behind BN ranking)
+
+---
+
+### BN Sanity Check (consistency/extremes)
+
+This reproduces the sanity check mentioned in the paper (e.g., all-VL vs all-VH and related consistency scenarios).
+
+Run:
+
+```bash
+python bn_sanity_check/run_sanity_bn.py
+```
+
+Inputs/outputs:
+
+- Input: `bn_sanity_check/scenarios_sanity_bn.csv`
+- Outputs:
+  - `bn_sanity_check/sanity_bn_results.csv`
+  - `bn_sanity_check/sanity_bn_checks.txt`
+  - optional extra files under `bn_sanity_check/out/`
+
+**What to cite as supplementary for sanity check**
+- `sanity_bn_results.csv` + `sanity_bn_checks.txt`
+
+---
+
+### RQ2 — GA Runtime using BN fitness
+
+This reproduces the runtime experiment for GA runs using the BN-based fitness evaluation.
+
+Run:
+
+```bash
+python rq2_runtime/rt_ga_bn_only_engine.py
+```
+
+Outputs:
+
+- `rq2_runtime/ga_bn_only_runs.csv`  
+  Per-run logs (run, seed, team size, pop size, generations, duration, fitness calls, ms/fitness, best fitness, best team, stop reason).
+- `rq2_runtime/ga_bn_only_summary.csv`  
+  Aggregated summary (mean/median/min/max/percentiles, etc.).
+
+**What to cite as supplementary for RQ2**
+- `ga_bn_only_runs.csv` (per-run evidence)
+- `ga_bn_only_summary.csv` (aggregated numbers)
+
+---
+
+## Where the “spreadsheets” fit
+
+The `.xlsx` files in the repository root are **human-readable viewers** of the same results:
+
+- `GA_Runtime.xlsx`
+- `Sanity_check.xlsx`
+- `Experiment_Ranking_Expert_BN.xlsx`
+
+They are **optional** for replication. The **source-of-truth** for reproducibility is the set of `.csv` files inside each experiment folder.
+
+---
+
+## Core Modules (what matters for correctness)
+
+- `Pipeline/evaluate_teams.py`  
+  The evaluator used by the experiments: computes **AT** and **AC**, then infers **AE** from the BN.
+- `Algorithms/BN/team_fit_bn.py` + `Algorithms/BN/bnetwork.py`  
+  BN structure, CPT generation/calibration and inference.
+- `Feature_Extraction/Dimension_Scoring/dimension_scoring.py`  
+  Technical coverage scoring (Domain/Ecosystem/Language).
+- `Feature_Extraction/PC_Transformer/pc_transformer.py`  
+  Pair Compatibility → Collaboration Fit mapping.
+- `Algorithms/GA/engine.py`  
+  GA loop and stop criteria (including stability-based stopping, if configured).
+
+---
+
+## Troubleshooting
+
+- **Missing `Dev_DB.json` / `Graph_DB.json`**: experiments will fail. Add them under `Data/`.
+- **Import errors**: ensure you are running commands from the repository root (the folder containing `Algorithms/`, `Pipeline/`, etc.).
+- **Module not found**: install the missing dependency shown in the error message.
+
+---
+
+## Author
+
+Felipe Oliveira Miranda Cunha — PPGCC/UFCG
+
+---
+
+## License
+
+Add your chosen license file (e.g., MIT) as `LICENSE`.
