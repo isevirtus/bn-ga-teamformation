@@ -1,0 +1,17 @@
+SANITY SUITE CHECKS
+===================
+
+[A] Boundary (extremes)
+S1 all VL -> AE_top=VL (expected VL), AE_mean=0.1069
+S2 all VH -> AE_top=VH (expected VH), AE_mean=0.8912
+
+[B] Local monotonicity (3-point: VL <= M <= VH with others fixed at M)
+Dom: mean(S3)=0.3637 <= mean(S0)=0.4981 <= mean(S4)=0.5746 -> PASS
+Eco: mean(S5)=0.4759 <= mean(S0)=0.4981 <= mean(S6)=0.5129 -> PASS
+Ling: mean(S7)=0.3090 <= mean(S0)=0.4981 <= mean(S8)=0.6051 -> PASS
+AC: mean(S9)=0.3000 <= mean(S0)=0.4981 <= mean(S10)=0.5507 -> PASS
+
+[C] Trade-off (should not saturate to the all-VH ceiling)
+S11 tech=VH,VH,VH + AC=VL -> AE_mean=0.4977 (must be < S2=0.8912)
+S12 tech=VL,VL,VL + AC=VH -> AE_mean=0.2532 (must be < S2=0.8912)
+

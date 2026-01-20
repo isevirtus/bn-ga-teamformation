@@ -1,0 +1,14 @@
+scenario_id;Dom;Eco;Ling;AC;group;description
+S0;M;M;M;M;baseline;Baseline: all inputs at Medium
+S1;VL;VL;VL;VL;extreme;Floor case: all inputs at Very Low
+S2;VH;VH;VH;VH;extreme;Ceiling case: all inputs at Very High
+S3;VL;M;M;M;isolated;Isolated effect: Dom=VL, others=M
+S4;VH;M;M;M;isolated;Isolated effect: Dom=VH, others=M
+S5;M;VL;M;M;isolated;Isolated effect: Eco=VL, others=M
+S6;M;VH;M;M;isolated;Isolated effect: Eco=VH, others=M
+S7;M;M;VL;M;isolated;Isolated effect: Ling=VL, others=M
+S8;M;M;VH;M;isolated;Isolated effect: Ling=VH, others=M
+S9;M;M;M;VL;isolated;Isolated effect: AC=VL, others=M
+S10;M;M;M;VH;isolated;Isolated effect: AC=VH, others=M
+S11;VH;VH;VH;VL;conflict;Trade-off: high technical (VH,VH,VH) with low collaboration (AC=VL)
+S12;VL;VL;VL;VH;conflict;Trade-off: low technical (VL,VL,VL) with high collaboration (AC=VH)
