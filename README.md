@@ -1,14 +1,12 @@
 # Replication & Supplementary Package (BN + GA for Software Team Formation)
 
-This repository is the **replication package** for the paper version used in the **NSE/ICSE** submission.  
-It contains the **core implementation** (Bayesian Network evaluator + Genetic Algorithm + feature extraction) and the **exact scripts/data artifacts** used to generate the **supplementary results** reported in the paper:
+This repository contains the **core implementation** (Bayesian Network evaluator + Genetic Algorithm + feature extraction) and the **exact scripts/data artifacts** used to generate the **supplementary results** reported in the paper:
 
 - **RQ1 — Expert Ranking vs. BN Ranking** (Table-1 agreement data + auxiliary ranking files)
 - **RQ2 — GA Runtime using BN fitness** (per-run logs + summary)
 - **BN Sanity Check** (extreme/consistency scenarios)
 
 > **Important note on data**: running the experiments requires `Data/Dev_DB.json` and `Data/Graph_DB.json`.  
-> If these files are not included due to confidentiality, the code still documents the full pipeline, but execution will require a compatible dataset.
 
 ---
 
@@ -21,24 +19,22 @@ STFP_NSE_ICSE/
 │   │   ├── bnetwork.py                 # BN engine and inference wrapper
 │   │   ├── team_fit_bn.py              # BN structure + CPT generation/calibration
 │   │   ├── utils.py                    # BN utilities (states, aggregation, helpers)
-│   │   └── repositorio.json            # (if present) samples/centroids for ranked nodes
+│   │   └── repository.json            # (if present) samples/centroids for ranked nodes
 │   └── GA/
 │       ├── engine.py                   # GA core loop (selection/crossover/mutation/stop)
-│       └── ...                         # other GA helpers (kept only if required)
+│                               
 │
 ├── Feature_Extraction/
 │   ├── Dimension_Scoring/
 │   │   ├── dimension_scoring.py        # Technical coverage scoring (Domain/Ecosystem/Language)
-│   │   ├── linear_regression_calibrator.py  # FS regression calibration utilities (if used)
-│   │   └── pesos_calibrados.json       # calibrated weights (if used)
+│   │   
 │   └── PC_Transformer/
 │       ├── pc_transformer.py           # Pair Compatibility (PC) → AC mapping
-│       └── filter_devs_by_graph.py     # graph-based filtering (if used)
+│       
 │
 ├── Pipeline/
 │   ├── evaluate_teams.py               # Main evaluator: AT + AC → BN inference → AE
-│   ├── scenarios.py                    # (if used) scenario definitions/helpers
-│   └── bench_bn_simple.py              # (if used) baseline evaluator
+│   
 │
 ├── Data/
 │   ├── Dev_DB.json                     # Developer database (required to run)
@@ -70,7 +66,7 @@ STFP_NSE_ICSE/
 ├── Sanity_check.xlsx                    # Human-readable spreadsheet (optional viewer)
 ├── Experiment_Ranking_Expert_BN.xlsx    # Human-readable spreadsheet (optional viewer)
 ├── __init__.py
-└── README.md
+
 ```
 
 ---
@@ -196,37 +192,6 @@ The `.xlsx` files in the repository root are **human-readable viewers** of the s
 - `GA_Runtime.xlsx`
 - `Sanity_check.xlsx`
 - `Experiment_Ranking_Expert_BN.xlsx`
-
-They are **optional** for replication. The **source-of-truth** for reproducibility is the set of `.csv` files inside each experiment folder.
-
----
-
-## Core Modules (what matters for correctness)
-
-- `Pipeline/evaluate_teams.py`  
-  The evaluator used by the experiments: computes **AT** and **AC**, then infers **AE** from the BN.
-- `Algorithms/BN/team_fit_bn.py` + `Algorithms/BN/bnetwork.py`  
-  BN structure, CPT generation/calibration and inference.
-- `Feature_Extraction/Dimension_Scoring/dimension_scoring.py`  
-  Technical coverage scoring (Domain/Ecosystem/Language).
-- `Feature_Extraction/PC_Transformer/pc_transformer.py`  
-  Pair Compatibility → Collaboration Fit mapping.
-- `Algorithms/GA/engine.py`  
-  GA loop and stop criteria (including stability-based stopping, if configured).
-
----
-
-## Troubleshooting
-
-- **Missing `Dev_DB.json` / `Graph_DB.json`**: experiments will fail. Add them under `Data/`.
-- **Import errors**: ensure you are running commands from the repository root (the folder containing `Algorithms/`, `Pipeline/`, etc.).
-- **Module not found**: install the missing dependency shown in the error message.
-
----
-
-## Author
-
-Felipe Oliveira Miranda Cunha — PPGCC/UFCG
 
 ---
 
